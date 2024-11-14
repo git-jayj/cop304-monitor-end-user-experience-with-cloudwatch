@@ -8,7 +8,10 @@ import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import software.amazon.cloudwatchlogs.emf.logger.MetricsLogger;
+import software.amazon.cloudwatchlogs.emf.model.DimensionSet;
+ 
+import java.util.List;
 public class MetricEmitter {
 
     private Logger logger = LoggerFactory.getLogger(MetricEmitter.class);
@@ -23,8 +26,10 @@ public class MetricEmitter {
     private LongCounter apiBytesSentCounter;
     private LongHistogram apiLatencyHistogram;
     private LongCounter petsReturned;
+    private final MetricsLogger metricsLogger;
 
-    public MetricEmitter(OpenTelemetry otel) {
+    public MetricEmitter(OpenTelemetry otel, MetricsLogger metricsLogger) {
+        this.metricsLogger = metricsLogger;
         Meter meter = otel.meterBuilder("aws-otel").setInstrumentationVersion("1.0").build();
 
         logger.debug("OTLP port is: " + System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"));
@@ -75,6 +80,11 @@ public class MetricEmitter {
                 "emit metric with return time " + returnTime + "ms, " + apiName + ", status code:" + statusCode);
         apiLatencyHistogram.record(
                 returnTime, Attributes.of(AttributeKey.stringKey(DIMENSION_API_NAME), apiName, AttributeKey.stringKey(DIMENSION_STATUS_CODE), statusCode));
+        
+        metricsLogger.putDimensions(DimensionSet.of(DIMENSION_API_NAME, apiName, DIMENSION_STATUS_CODE, statusCode));
+        metricsLogger.putMetric("Latency", returnTime);
+        metricsLogger.flush();
+        metricsLogger.resetDimensions(false);
     }
 
     /**
@@ -88,10 +98,18 @@ public class MetricEmitter {
         logger.debug("emit metric with http request size " + bytes + " bytes, " + apiName);
         apiBytesSentCounter.add(
                 bytes, Attributes.of(AttributeKey.stringKey(DIMENSION_API_NAME), apiName, AttributeKey.stringKey(DIMENSION_STATUS_CODE), statusCode));
+        
+        metricsLogger.putDimensions(DimensionSet.of(DIMENSION_API_NAME, apiName, DIMENSION_STATUS_CODE, statusCode));
+        metricsLogger.putMetric("BytesSent", bytes);
+        metricsLogger.flush();
+        metricsLogger.resetDimensions(false);
+   
     }
 
     public void emitPetsReturnedMetric(int petsCount) {
         petsReturned.add(petsCount);
+        metricsLogger.putMetric("PetsCount", petsCount);
+        metricsLogger.flush();
     }
 
 }

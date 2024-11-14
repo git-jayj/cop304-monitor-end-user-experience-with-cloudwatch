@@ -89,7 +89,7 @@ public class SearchController {
                 s3Client.createBucket(s3BucketName);
             }
 
-            logger.info("Generating presigned url");
+            logger.info("Generating presigned S3 url");
             GeneratePresignedUrlRequest generatePresignedUrlRequest =
                     new GeneratePresignedUrlRequest(s3BucketName, key)
                             .withMethod(HttpMethod.GET)

@@ -1,5 +1,6 @@
 package ca.petsearch;
 
+import ca.petsearch.metrics.StdoutEnvironment;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -15,6 +16,9 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import software.amazon.cloudwatchlogs.emf.config.EnvironmentConfigurationProvider;
+import software.amazon.cloudwatchlogs.emf.environment.Environment;
+import software.amazon.cloudwatchlogs.emf.logger.MetricsLogger;
 
 import java.util.Arrays;
 
@@ -65,8 +69,18 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public MetricEmitter metricEmitter(OpenTelemetry otel) {
-        return new MetricEmitter(otel);
+    public MetricsLogger metricsLogger() {
+        software.amazon.cloudwatchlogs.emf.config.Configuration config = EnvironmentConfigurationProvider.getConfig();
+        Environment environment = new StdoutEnvironment(config);
+        MetricsLogger metricsLogger = new MetricsLogger(environment);
+        metricsLogger.setNamespace("PetClinic/Search");
+        metricsLogger.resetDimensions(false);
+        return metricsLogger;
+    }
+ 
+    @Bean
+    public MetricEmitter metricEmitter(OpenTelemetry otel, MetricsLogger metricsLogger) {
+        return new MetricEmitter(otel, metricsLogger);
     }
 
     @Bean
