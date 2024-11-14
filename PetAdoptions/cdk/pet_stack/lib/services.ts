@@ -82,7 +82,7 @@ export class Services extends Stack {
           treatMissingData: TreatMissingData.NOT_BREACHING,
           comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
           evaluationPeriods: 1,
-          alarmName: `${dynamodb_petadoption.tableName}-WriteThrottleEvents-BasicAlarm`,
+          alarmName: `${dynamodb_petadoption.tableName}-WriteThrottleEvents-BasicAlarm-cop304`,
         });
 
         dynamodb_petadoption.metric('ReadThrottleEvents',{statistic:"avg"}).createAlarm(this, 'ReadThrottleEvents-BasicAlarm', {
