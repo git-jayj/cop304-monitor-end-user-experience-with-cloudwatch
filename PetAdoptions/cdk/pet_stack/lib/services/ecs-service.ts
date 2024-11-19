@@ -81,7 +81,7 @@ export abstract class EcsService extends Construct {
 
     const taskRole = new iam.Role(this, `taskRole`, {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-      roleName: "SearchService"
+      roleName: "PetSearchService"
     });
 
     this.taskDefinition = new ecs.FargateTaskDefinition(this, "taskDefinition", {
