@@ -178,9 +178,7 @@ export class Services extends Stack {
             vpc: theVPC,
             containerInsights: true
         });
-        const ecsPayForAdoptionRole = new iam.Role(this, 'ecsPayForAdoptionRole', {
-            assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
-        });
+
         // PayForAdoption service definitions-----------------------------------------------------------------------
         const payForAdoptionService = new PayForAdoptionService(this, 'pay-for-adoption-service', {
             cluster: ecsPayForAdoptionCluster,
@@ -194,7 +192,7 @@ export class Services extends Stack {
             desiredTaskCount: 2,
             region: region,
             securityGroup: ecsServicesSecurityGroup,
-            taskRole: ecsPayForAdoptionRole
+            serviceName: 'PayForAdoption'
         });
         payForAdoptionService.taskDefinition.taskRole?.addToPrincipalPolicy(readSSMParamsPolicy);
         payForAdoptionService.taskDefinition.taskRole?.addToPrincipalPolicy(ddbSeedPolicy);
@@ -204,9 +202,7 @@ export class Services extends Stack {
             vpc: theVPC,
             containerInsights: true
         });
-        const ecsPetListAdoptionRole = new iam.Role(this, 'ecsPetListAdoptionRole', {
-            assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
-        });
+
         // PetListAdoptions service definitions-----------------------------------------------------------------------
         const listAdoptionsService = new ListAdoptionsService(this, 'list-adoptions-service', {
             cluster: ecsPetListAdoptionCluster,
@@ -221,7 +217,7 @@ export class Services extends Stack {
             desiredTaskCount: 2,
             region: region,
             securityGroup: ecsServicesSecurityGroup,
-            taskRole: ecsPetListAdoptionRole
+            serviceName: 'ListAdoption'
         });
         listAdoptionsService.taskDefinition.taskRole?.addToPrincipalPolicy(readSSMParamsPolicy);
 
@@ -229,10 +225,7 @@ export class Services extends Stack {
             vpc: theVPC,
             containerInsights: true
         });
-        const ecsPetSearchRole = new iam.Role(this, 'ecsPetSearchRole', {
-            assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-            roleName: 'PetSearchService',
-        });
+
         // PetSearch service definitions-----------------------------------------------------------------------
         const searchService = new SearchService(this, 'search-service', {
             cluster: ecsPetSearchCluster,
@@ -245,7 +238,7 @@ export class Services extends Stack {
             instrumentation: 'otel',
             region: region,
             securityGroup: ecsServicesSecurityGroup,
-            taskRole: ecsPetSearchRole
+            serviceName: 'PetSearch'
         })
         searchService.taskDefinition.taskRole?.addToPrincipalPolicy(readSSMParamsPolicy);
 
@@ -260,7 +253,7 @@ export class Services extends Stack {
             desiredTaskCount: 1,
             region: region,
             securityGroup: ecsServicesSecurityGroup,
-            taskRole: ecsPetListAdoptionRole
+            serviceName: 'TrafficGenerator'
         })
         trafficGeneratorService.taskDefinition.taskRole?.addToPrincipalPolicy(readSSMParamsPolicy);
 

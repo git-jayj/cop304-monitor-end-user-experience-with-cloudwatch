@@ -26,7 +26,7 @@ export interface EcsServiceProps {
 
   securityGroup: ec2.SecurityGroup,
 
-  taskRole: iam.Role
+  serviceName: string,
 }
 
 export abstract class EcsService extends Construct {
@@ -81,13 +81,25 @@ export abstract class EcsService extends Construct {
     });
    //*/
 
-    this.taskDefinition = new ecs.FargateTaskDefinition(this, "taskDefinition", {
-      cpu: props.cpu,
-      taskRole: props.taskRole,
-      memoryLimitMiB: props.memoryLimitMiB
+    let taskRole = new iam.Role(this, 'taskRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
     });
 
-    this.taskDefinition.addToExecutionRolePolicy(EcsService.ExecutionRolePolicy);
+    let executionRole = new iam.Role(this, 'executionRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      roleName: props.serviceName,
+    });
+    executionRole.addToPolicy(EcsService.ExecutionRolePolicy);
+
+    this.taskDefinition = new ecs.FargateTaskDefinition(this, "taskDefinition", {
+      cpu: props.cpu,
+      taskRole: taskRole,
+      memoryLimitMiB: props.memoryLimitMiB,
+      executionRole: executionRole
+    });
+
+
+    // this.taskDefinition.addToExecutionRolePolicy(EcsService.ExecutionRolePolicy);
     this.taskDefinition.taskRole?.addManagedPolicy(iam.ManagedPolicy.fromManagedPolicyArn(this, 'AmazonECSTaskExecutionRolePolicy', 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'));
     this.taskDefinition.taskRole?.addManagedPolicy(iam.ManagedPolicy.fromManagedPolicyArn(this, 'AWSXrayWriteOnlyAccess', 'arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess'));
 
