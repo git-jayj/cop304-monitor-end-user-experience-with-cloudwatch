@@ -78,11 +78,14 @@ export abstract class EcsService extends Construct {
       }
     });
    //*/
+    let taskRole = iam.Role.tryFromRoleName(this, 'taskRole', 'PetSearchService');
 
-    const taskRole = new iam.Role(this, `taskRole`, {
-      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-      roleName: "PetSearchService"
-    });
+    if (!taskRole) {
+      taskRole = new iam.Role(this, 'taskRole', {
+        assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+        roleName: 'PetSearchService',
+      });
+    }
 
     this.taskDefinition = new ecs.FargateTaskDefinition(this, "taskDefinition", {
       cpu: props.cpu,
