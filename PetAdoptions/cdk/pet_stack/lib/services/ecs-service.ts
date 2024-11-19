@@ -78,12 +78,24 @@ export abstract class EcsService extends Construct {
       }
     });
    //*/
-    let taskRole = iam.Role.tryFromRoleName(this, 'taskRole', 'PetSearchService');
 
-    if (!taskRole) {
+    const roleName = 'PetSearchService';
+
+    let taskRole: iam.IRole;
+
+    try {
+      // Try to import the existing role
+      taskRole = iam.Role.fromRoleName(this, 'taskRole', roleName);
+
+      // Check if the role actually exists
+      new iam.CfnRole(this, 'RoleExistenceChecker', {
+        roleName: roleName,
+      }).overrideLogicalId('RoleExistenceChecker');
+    } catch (e) {
+      // If the role doesn't exist, create a new one
       taskRole = new iam.Role(this, 'taskRole', {
         assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-        roleName: 'PetSearchService',
+        roleName: roleName,
       });
     }
 
