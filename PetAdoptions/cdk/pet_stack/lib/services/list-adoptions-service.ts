@@ -16,8 +16,7 @@ export class ListAdoptionsService extends EcsService {
     super(scope, id, props);
 
 
-    let taskRole = iam.Role.fromRoleName(this, 'listAdoptionsTaskRole', 'PetSearchService');
-    props.database.secret?.grantRead(taskRole);
+    props.database.secret?.grantRead(this.taskDefinition.taskRole);
   }
 
   containerImageFromRepository(repositoryURI: string): ecs.ContainerImage {

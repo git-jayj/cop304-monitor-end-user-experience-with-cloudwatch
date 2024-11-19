@@ -14,8 +14,7 @@ export class PayForAdoptionService extends EcsService {
   constructor(scope: Construct, id: string, props: PayForAdoptionServiceProps) {
     super(scope, id, props);
 
-    let taskRole = iam.Role.fromRoleName(this, 'payForAdoptionTaskRole', 'PetSearchService');
-    props.database.secret?.grantRead(taskRole);
+    props.database.secret?.grantRead(this.taskDefinition.taskRole);
   }
 
   containerImageFromRepository(repositoryURI: string): ecs.ContainerImage {

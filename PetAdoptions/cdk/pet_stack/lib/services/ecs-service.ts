@@ -24,7 +24,9 @@ export interface EcsServiceProps {
 
   region: string,
 
-  securityGroup: ec2.SecurityGroup
+  securityGroup: ec2.SecurityGroup,
+
+  taskRole: iam.Role
 }
 
 export abstract class EcsService extends Construct {
@@ -79,14 +81,9 @@ export abstract class EcsService extends Construct {
     });
    //*/
 
-    let taskRole = new iam.Role(this, 'taskRole', {
-      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-      roleName: 'PetSearchService',
-    });
-
     this.taskDefinition = new ecs.FargateTaskDefinition(this, "taskDefinition", {
       cpu: props.cpu,
-      taskRole: taskRole,
+      taskRole: props.taskRole,
       memoryLimitMiB: props.memoryLimitMiB
     });
 
