@@ -178,7 +178,7 @@ export class Services extends Stack {
             vpc: theVPC,
             containerInsights: true
         });
-        const ecsPayForAdoptionRole = new iam.Role(this, 'taskRole', {
+        const ecsPayForAdoptionRole = new iam.Role(this, 'ecsPayForAdoptionRole', {
             assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
         });
         // PayForAdoption service definitions-----------------------------------------------------------------------
@@ -204,7 +204,7 @@ export class Services extends Stack {
             vpc: theVPC,
             containerInsights: true
         });
-        const ecsPetListAdoptionRole = new iam.Role(this, 'taskRole', {
+        const ecsPetListAdoptionRole = new iam.Role(this, 'ecsPetListAdoptionRole', {
             assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
         });
         // PetListAdoptions service definitions-----------------------------------------------------------------------
@@ -229,7 +229,7 @@ export class Services extends Stack {
             vpc: theVPC,
             containerInsights: true
         });
-        const ecsPetSearchRole = new iam.Role(this, 'taskRole', {
+        const ecsPetSearchRole = new iam.Role(this, 'ecsPetSearchRole', {
             assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
             roleName: 'PetSearchService',
         });
